@@ -8,7 +8,10 @@ on:
         required: false
         default: ""
   schedule:
-    - cron: "23 */6 * * *"
+    # Every 15 minutes — the shortest practical interval GitHub Actions supports for cron.
+    # This is the only propagation path amoo-ai's release workflow relies on unless a
+    # HOMEBREW_TAP_TOKEN secret is added there for instant pushes; no secret is needed here.
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: write
