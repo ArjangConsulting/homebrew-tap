@@ -1,0 +1,141 @@
+name: Update Formula
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: amoo version to publish. Leave blank for latest release.
+        required: false
+        default: ""
+  schedule:
+    - cron: "23 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-formula
+  cancel-in-progress: false
+
+jobs:
+  update-formula:
+    name: Update Formula
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@v4
+
+      - name: Resolve release version
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "$INPUT_VERSION" ]; then
+            version="$INPUT_VERSION"
+          else
+            # shellcheck disable=SC2016 # jq variables are intentionally single-quoted.
+            version="$(
+              gh api "repos/ArjangConsulting/amoo-ai/releases?per_page=100" --jq '
+                [
+                  .[]
+                  | select(.draft == false and .prerelease == false)
+                  | . as $release
+                  | select(
+                      any(
+                        .assets[];
+                        .name == ("amoo-" + $release.tag_name + "-macos-universal.tar.gz")
+                      )
+                      and any(
+                        .assets[];
+                        .name == ("amoo-" + $release.tag_name + "-linux-static.tar.gz")
+                      )
+                    )
+                ][0].tag_name // empty
+              '
+            )"
+
+            if [ -z "$version" ]; then
+              echo "::error::No upstream release has both required binary archives."
+              exit 1
+            fi
+          fi
+
+          current="$(ruby -e 'content = File.read("Formula/amoo.rb"); puts content[%r{releases/download/([^/]+)/amoo-}, 1] || ""')"
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+
+          if [ "$version" = "$current" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update formula files
+        if: steps.release.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          macos_url="https://github.com/ArjangConsulting/amoo-ai/releases/download/$VERSION/amoo-$VERSION-macos-universal.tar.gz"
+          linux_url="https://github.com/ArjangConsulting/amoo-ai/releases/download/$VERSION/amoo-$VERSION-linux-static.tar.gz"
+
+          curl -fsSL -o amoo-macos.tar.gz "$macos_url"
+          curl -fsSL -o amoo-linux.tar.gz "$linux_url"
+
+          export MACOS_URL="$macos_url"
+          export LINUX_URL="$linux_url"
+          MACOS_SHA256="$(shasum -a 256 amoo-macos.tar.gz | cut -d ' ' -f 1)"
+          export MACOS_SHA256
+          LINUX_SHA256="$(shasum -a 256 amoo-linux.tar.gz | cut -d ' ' -f 1)"
+          export LINUX_SHA256
+
+          ruby <<'RUBY'
+          version    = ENV.fetch("VERSION")
+          macos_url  = ENV.fetch("MACOS_URL")
+          linux_url  = ENV.fetch("LINUX_URL")
+          macos_sha  = ENV.fetch("MACOS_SHA256")
+          linux_sha  = ENV.fetch("LINUX_SHA256")
+
+          formula_path = "Formula/amoo.rb"
+          formula = File.read(formula_path)
+
+          formula.gsub!(%r{releases/download/[^/]+/amoo-[^"]+-macos-universal\.tar\.gz},
+                        "releases/download/#{version}/amoo-#{version}-macos-universal.tar.gz")
+          formula.gsub!(%r{releases/download/[^/]+/amoo-[^"]+-linux-static\.tar\.gz},
+                        "releases/download/#{version}/amoo-#{version}-linux-static.tar.gz")
+          formula.gsub!(/(on_macos do\n\s+url "[^"]+"\n\s+sha256 ")[^"]+/, "\\1#{macos_sha}")
+          formula.gsub!(/(on_linux do\n\s+url "[^"]+"\n\s+sha256 ")[^"]+/, "\\1#{linux_sha}")
+
+          File.write(formula_path, formula)
+
+          readme_path = "README.md"
+          readme = File.read(readme_path)
+          readme.gsub!(/\| `amoo` \| [^|]+ \| AI-driven mobile testing framework for iOS and Android \|/,
+                       "| `amoo` | #{version} | AI-driven mobile testing framework for iOS and Android |")
+          File.write(readme_path, readme)
+          RUBY
+
+      - name: Commit formula update
+        if: steps.release.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/amoo.rb README.md
+
+          if git diff --cached --quiet; then
+            echo "No formula changes to commit."
+            exit 0
+          fi
+
+          git commit -m "amoo $VERSION"
+          git push origin HEAD:main

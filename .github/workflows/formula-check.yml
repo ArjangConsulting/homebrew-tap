@@ -1,0 +1,49 @@
+name: Formula Check
+
+on:
+  pull_request:
+    paths:
+      - Formula/**
+      - "*.md"
+      - .github/workflows/**
+  push:
+    branches: [main]
+    paths:
+      - Formula/**
+      - "*.md"
+      - .github/workflows/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formula-check-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  formula-check:
+    name: Formula Check
+    runs-on: macos-15
+
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Cache Homebrew Bundler RubyGems
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: ${{ runner.os }}-rubygems-
+
+      - name: Install Homebrew Bundler RubyGems
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: brew install-bundler-gems
+
+      - name: Tap syntax
+        run: brew test-bot --only-tap-syntax --skip-online-checks
+
+      - name: Formula audit
+        run: brew audit --strict --online --tap=arjangconsulting/tap amoo
