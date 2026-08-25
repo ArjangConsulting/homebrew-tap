@@ -1,6 +1,7 @@
 class Amoo < Formula
   desc "AI-driven mobile testing framework for iOS and Android"
   homepage "https://github.com/ArjangConsulting/amoo-ai"
+  license "MIT"
 
   head "https://github.com/ArjangConsulting/amoo-ai.git", branch: "main"
 
