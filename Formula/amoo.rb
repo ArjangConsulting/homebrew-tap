@@ -1,7 +1,3 @@
-# Template formula. The release workflow (.github/workflows/release.yml) renders this on each
-# tag — substituting 0.1.0 and the two SHA256 placeholders with real values — and
-# publishes the result to the Homebrew tap. Releases use bare semver tags (no `v` prefix), so the
-# download URL must not include a `v`. Do not hand-fill the placeholders here.
 class Amoo < Formula
   desc "AI-driven mobile testing framework for iOS and Android"
   homepage "https://github.com/ArjangConsulting/amoo-ai"
