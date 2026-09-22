@@ -24,8 +24,9 @@ skipped:
 
 1. Download the release tarballs and compute their SHA256 — see amoo-ai's
    `docs/homebrew.md` and `scripts/update-formula.sh`.
-2. Edit `Formula/amoo.rb` — update `version` and both `sha256` fields under `on_macos do` /
-   `on_linux do`. The URLs use the bare tag (no `v` prefix).
+2. Edit `Formula/amoo.rb` — update both `url` and `sha256` fields under `if OS.mac?` /
+   `if OS.linux?`. The URLs use the bare tag (no `v` prefix); `version` is scanned from the
+   URL automatically and must not be set explicitly (Homebrew's audit flags it as redundant).
 3. Update the formula version table in `README.md`.
 4. Validate locally before committing (see Testing section below).
 5. Commit with the message `amoo <VERSION>`.
