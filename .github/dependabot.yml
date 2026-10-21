@@ -6,6 +6,7 @@ updates:
       interval: weekly
       day: monday
     groups:
-      github-actions:
+      dependencies:
         patterns:
-          - "*"
+          - '*'
+    open-pull-requests-limit: 1
