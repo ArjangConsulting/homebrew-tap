@@ -5,12 +5,12 @@ class Amoo < Formula
   version "0.3.0"
 
   on_macos do
-    url "https://github.com/ArjangConsulting/amoo-ai/releases/download/#{version}/amoo-#{version}-macos-universal.tar.gz"
+    url "https://github.com/ArjangConsulting/amoo-ai/releases/download/0.3.0/amoo-0.3.0-macos-universal.tar.gz"
     sha256 "3aa3506d6fda743e5751a656ca71e6b5b765a0fddcc481291fbbb05abd60642b"
   end
 
   on_linux do
-    url "https://github.com/ArjangConsulting/amoo-ai/releases/download/#{version}/amoo-#{version}-linux-static.tar.gz"
+    url "https://github.com/ArjangConsulting/amoo-ai/releases/download/0.3.0/amoo-0.3.0-linux-static.tar.gz"
     sha256 "93eba5963abe5370295fcd76bff41a3944913dace19246ba7c9961be8154a3fa"
   end
 
