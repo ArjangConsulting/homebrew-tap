@@ -2,16 +2,16 @@ class Amoo < Formula
   desc "AI-driven mobile testing framework for iOS and Android"
   homepage "https://github.com/ArjangConsulting/amoo-ai"
   license "MIT"
-  version "0.3.0"
+  version "0.4.0"
 
   on_macos do
-    url "https://github.com/ArjangConsulting/amoo-ai/releases/download/0.3.0/amoo-0.3.0-macos-universal.tar.gz"
-    sha256 "3aa3506d6fda743e5751a656ca71e6b5b765a0fddcc481291fbbb05abd60642b"
+    url "https://github.com/ArjangConsulting/amoo-ai/releases/download/#{version}/amoo-#{version}-macos-universal.tar.gz"
+    sha256 "3fd3c03c3b548d8d8af980177cc9094a1bf345b60c81c6749245a60596798879"
   end
 
   on_linux do
-    url "https://github.com/ArjangConsulting/amoo-ai/releases/download/0.3.0/amoo-0.3.0-linux-static.tar.gz"
-    sha256 "93eba5963abe5370295fcd76bff41a3944913dace19246ba7c9961be8154a3fa"
+    url "https://github.com/ArjangConsulting/amoo-ai/releases/download/#{version}/amoo-#{version}-linux-static.tar.gz"
+    sha256 "7d77ab811e9e45e0965fb14ec7354e223370f1fddc90b09e73a1345fc446be12"
   end
 
   def install
