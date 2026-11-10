@@ -20,7 +20,7 @@ amoo --version
 
 | Formula | Version | Description |
 |---------|---------|-------------|
-| `amoo` | 0.3.0 | AI-driven mobile testing framework for iOS and Android |
+| `amoo` | 0.4.0 | AI-driven mobile testing framework for iOS and Android |
 
 ## Upgrade
 
