@@ -113,7 +113,7 @@ jobs:
           formula.gsub!(%r{releases/download/[^/]+/amoo-[^"]+-linux-static\.tar\.gz},
                         "releases/download/#{version}/amoo-#{version}-linux-static.tar.gz")
           formula.gsub!(/(if OS\.mac\?\n\s+url "[^"]+"\n\s+sha256 ")[^"]+/, "\\1#{macos_sha}")
-          formula.gsub!(/(if OS\.linux\?\n\s+url "[^"]+"\n\s+sha256 ")[^"]+/, "\\1#{linux_sha}")
+          formula.gsub!(/((?:el)?if OS\.linux\?\n\s+url "[^"]+"\n\s+sha256 ")[^"]+/, "\\1#{linux_sha}")
 
           File.write(formula_path, formula)
 
