@@ -48,8 +48,7 @@ For syntax and style checks without installing:
 
 ```bash
 brew style Formula/amoo.rb
-brew audit --new Formula/amoo.rb   # use --new only for the first release
-brew audit Formula/amoo.rb         # use this for subsequent updates
+brew audit Formula/amoo.rb
 ```
 
 ## Formula conventions
